@@ -1,4 +1,4 @@
-/* .bmp-related data types based on Microsoft's own.
+/* BMP-related data types based on Microsoft's own.
 Adapted from https://cs50.harvard.edu/x/2023/psets/4/filter/more/. */
 
 #include <stdint.h>
