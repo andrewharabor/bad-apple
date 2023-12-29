@@ -4,6 +4,9 @@
 
 A 20 FPS ASCII animation of the famous [Bad Apple video](https://www.youtube.com/watch?v=FtutLA63Cp8).
 
+[bad-apple.webm](https://github.com/andrewharabor/bad-apple/assets/120438036/1e40df4a-147e-4849-8c5c-d9c6f2619f0e)
+_The first 25 seconds or so of the animation._
+
 ## Implementation
 
 The video was split into frames and each one converted to a [BMP](https://en.wikipedia.org/wiki/BMP_file_format) file. This format was used as opposed toa  more popular one like [JPEG](https://en.wikipedia.org/wiki/JPEG) due to the fact that it is uncompressed and easier to read from.
