@@ -5,8 +5,6 @@
 A 20 FPS ASCII animation of the famous [Bad Apple video](https://www.youtube.com/watch?v=FtutLA63Cp8).
 
 [The first 25 seconds or so of the animation.](https://github.com/andrewharabor/bad-apple/assets/120438036/1e40df4a-147e-4849-8c5c-d9c6f2619f0e)
-\
-_The first 25 seconds or so of the animation._
 
 ## Implementation
 
