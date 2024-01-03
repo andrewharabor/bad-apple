@@ -51,21 +51,20 @@ char g_grayscale[SHADES] = "@&%QWNM0gB$#DR8mHXKAUbGOpV4d9h6PkqwSE2ayjxY5Zoenult1
 
 void read_bitmap(char *file_name, rgb_triple bitmap[HEIGHT][WIDTH], char *run_command);
 void print_frame(int height, int width, rgb_triple bitmap[height][width], char *run_command);
-int sleep_msecs(unsigned long msecs);
+int sleep(struct timespec time_value);
 
 /* Display a 20 FPS ASCII animation of the famous Bad Apple video (https://www.youtube.com/watch?v=FtutLA63Cp8) to `stdout`.*/
 int main(int argc, char *argv[])
 {
     int frame_num;
     char bmp_file_name[FILE_NAME_LEN + 1];
-    double time_diff_secs;
-    time_t start_time, end_time;
+    struct timespec start_time, end_time, sleep_time;
     rgb_triple bitmap[HEIGHT][WIDTH];
 
     for (frame_num = 1; frame_num <= FRAME_COUNT; frame_num++)
     {
         // Begin timing the processing of the frame
-        time(&start_time);
+        timespec_get(&start_time, TIME_UTC);
 
         // Read the bitmap from the frame and print it
         sprintf(bmp_file_name, FILE_NAME_FORMAT, frame_num);
@@ -73,11 +72,16 @@ int main(int argc, char *argv[])
         print_frame(HEIGHT, WIDTH, bitmap, argv[0]);
 
         // Ensure `FPS` frames per second is maintained
-        time(&end_time);
-        if ((time_diff_secs = (1 / (float) FPS) - difftime(end_time, start_time)) > 0)
+        timespec_get(&end_time, TIME_UTC);
+        sleep_time.tv_sec = end_time.tv_sec - start_time.tv_sec;
+        sleep_time.tv_nsec = end_time.tv_nsec - start_time.tv_nsec;
+        if (sleep_time.tv_nsec < 0)
         {
-            sleep_msecs(time_diff_secs * 1000);
+            sleep_time.tv_sec -= 1;
+            sleep_time.tv_nsec += 1e+9;
         }
+        sleep_time.tv_nsec = ((1 / (float) FPS) * 1e+9) - sleep_time.tv_nsec;
+        sleep(sleep_time);
     }
 
     exit(0);
@@ -171,7 +175,7 @@ void print_frame(int height, int width, rgb_triple bitmap[height][width], char *
 {
     int i, j, k, l, buff_idx;
     float sum, avg;
-    char buffer[(DISPLAY_HEIGHT + 2) * (2 * DISPLAY_WIDTH + 3) + 1], c;
+    char c, buffer[(DISPLAY_HEIGHT + 2) * (2 * DISPLAY_WIDTH + 3) + 1]; // include space for border, newlines, and null terminator
     rgb_triple pixel;
 
     buff_idx = 0;
@@ -205,7 +209,7 @@ void print_frame(int height, int width, rgb_triple bitmap[height][width], char *
             avg = sum / (float) (SCALE_FACTOR * SCALE_FACTOR);
             c = g_grayscale[(int) round(avg * (SHADES - 1) / 255.0)];
             buffer[buff_idx++] = c;
-            buffer[buff_idx++] = c; // print each character twice to compensate for their rectangular shape
+            buffer[buff_idx++] = c; // add each character twice to compensate for their rectangular shape
         }
 
         buffer[buff_idx++] = '|';
@@ -244,14 +248,10 @@ void print_frame(int height, int width, rgb_triple bitmap[height][width], char *
     return;
 }
 
-/* Delay program execution for `msecs` milliseconds. */
-int sleep_msecs(unsigned long msecs)
+/* Delay program execution according to `time_value`. */
+int sleep(struct timespec time_value)
 {
-    struct timespec time_value;
     int result;
-
-    time_value.tv_sec = msecs / 1000;
-    time_value.tv_nsec = (msecs % 1000) * 1000000;
 
     // Ensure the full duration of the time is slept, despite interruptions
     do
